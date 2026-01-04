@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>カインズ伊勢崎店 予約 | ひまわり</title>
+    <style>
+        :root { --main-yellow: #ffcc00; --charcoal: #333; }
+        body { font-family: sans-serif; background: #fffcf0; color: var(--charcoal); padding: 0; margin: 0; }
+        .header { background: var(--main-yellow); padding: 20px; text-align: center; border-bottom: 4px solid var(--charcoal); }
+        .container { padding: 15px; max-width: 500px; margin: auto; }
+        .menu-category { font-weight: bold; background: var(--charcoal); color: white; padding: 5px 15px; border-radius: 5px; margin-top: 20px; }
+        .menu-list { background: white; padding: 10px; border-radius: 10px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); margin-top: 5px; }
+        .item { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid #eee; }
+        input[type="number"] { width: 50px; padding: 8px; border: 1px solid #ccc; border-radius: 5px; text-align: center; }
+        .footer-bar { position: sticky; bottom: 0; background: var(--charcoal); color: var(--main-yellow); padding: 20px; text-align: center; border-radius: 20px 20px 0 0; }
+        .btn-submit { background: var(--main-yellow); color: var(--charcoal); border: none; padding: 15px; border-radius: 50px; font-weight: bold; font-size: 1.2rem; cursor: pointer; width: 100%; margin-top: 10px; }
+    </style>
+</head>
+<body>
+<div class="header"><h1>🌻 やきとり ひまわり</h1><p>📍 伊勢崎アバンセ</p></div>
+<div class="container">
+    <div id="welcomeMsg" style="text-align:center; padding:10px;"></div>
+    <form id="orderForm">
+        <input type="hidden" id="phoneInput" name="phone" value="ゲスト">
+        <div class="menu-category">メニュー</div>
+        <div class="menu-list">
+            <div class="item"><span>ねぎま(150円)</span><input type="number" class="qty" data-name="ねぎま" data-price="150" value="0" min="0" onchange="calc()"></div>
+            <div class="item"><span>つくね(160円)</span><input type="number" class="qty" data-name="つくね" data-price="160" value="0" min="0" onchange="calc()"></div>
+            <div class="item"><span>軟骨(170円)</span><input type="number" class="qty" data-name="軟骨" data-price="170" value="0" min="0" onchange="calc()"></div>
+            <div class="item"><span>レバー(150円)</span><input type="number" class="qty" data-name="レバー" data-price="150" value="0" min="0" onchange="calc()"></div>
+        </div>
+        <h3 style="margin-top:20px;">🕙 受取時間</h3>
+        <input type="time" id="orderTime" required style="width:100%; padding:15px; font-size:1.2rem; border-radius:10px; border:1px solid #ccc;">
+        <div style="height:120px;"></div>
+        <div class="footer-bar">
+            <div>合計: ¥<span id="totalDisplay">0</span></div>
+            <button type="submit" id="submitBtn" class="btn-submit">予約を確定する</button>
+        </div>
+    </form>
+</div>
+<script>
+    const GAS_URL = "https://script.google.com/macros/s/AKfycbyXjou238uSIGyVJtiyyf8npCJOUZiqLXWXpbhYHX9FyZWgrrgZ-p4q8iUOWZA40N2w/exec"; // ←ここだけ書き換えて！
+
+    function calc() {
+        let total = 0;
+        document.querySelectorAll('.qty').forEach(item => {
+            total += parseInt(item.getAttribute('data-price')) * parseInt(item.value);
+        });
+        document.getElementById('totalDisplay').innerText = total.toLocaleString();
+    }
+
+    document.getElementById('orderForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const btn = document.getElementById('submitBtn');
+        btn.disabled = true; btn.innerText = "送信中...";
+
+        let summary = "";
+        document.querySelectorAll('.qty').forEach(el => {
+            if(el.value > 0) summary += `${el.dataset.name}x${el.value} `;
+        });
+
+        const orderId = "H-" + Math.random().toString(36).substring(2, 7).toUpperCase();
+        const time = document.getElementById('orderTime').value;
+
+        try {
+            await fetch(GAS_URL, {
+                method: "POST",
+                body: JSON.stringify({
+                    orderId: orderId,
+                    time: time,
+                    phone: document.getElementById('phoneInput').value,
+                    items: summary,
+                    total: document.getElementById('totalDisplay').innerText
+                })
+            });
+            location.href = `complete.html?orderId=${orderId}&time=${time}`;
+        } catch (e) {
+            alert("エラー発生。もう一度試して！");
+            btn.disabled = false; btn.innerText = "予約を確定する";
+        }
+    });
+
+    const phone = new URLSearchParams(window.location.search).get('phone');
+    if(phone) {
+        document.getElementById('phoneInput').value = phone;
+        document.getElementById('welcomeMsg').innerText = "📞 " + phone + " 様 (常連ログイン)";
+    }
+</script>
+</body>
+</html>

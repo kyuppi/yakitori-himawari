@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>予約完了 | ひまわり</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+</head>
+<body style="text-align:center; font-family:sans-serif; background:#fffcf0; padding:40px 20px;">
+    <h1 style="color:#800000;">予約完了！🌻</h1>
+    <div style="background:white; padding:20px; border-radius:15px; border:2px solid #333; display:inline-block;">
+        <p>予約番号</p>
+        <h2 id="orderId" style="font-size:2rem; color:#ff4500;"></h2>
+        <div id="qrcode" style="display:flex; justify-content:center; margin:20px 0;"></div>
+        <p id="orderTime" style="font-weight:bold;"></p>
+    </div>
+    <p style="margin-top:20px;"><a href="index.html">トップへ戻る</a></p>
+    <script>
+        const params = new URLSearchParams(window.location.search);
+        const id = params.get('orderId');
+        document.getElementById('orderId').innerText = id;
+        document.getElementById('orderTime').innerText = "受取時間: " + params.get('time');
+        new QRCode(document.getElementById("qrcode"), { text: id, width: 150, height: 150 });
+    </script>
+</body>
+</html>
